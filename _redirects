@@ -1,0 +1,2 @@
+# Обратная совместимость со старым форматом QR-кодов
+/check.html/:id/day/:day  /check.html?id=:id&day=:day  301

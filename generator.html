@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор математической тетради с QR-кодами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        /* ===== ПАНЕЛЬ УПРАВЛЕНИЯ ===== */
+        .control-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 900px;
+            margin: 0 auto 20px auto;
+        }
+        
+        .control-panel h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .info-box h4 {
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+        
+        .info-box p {
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .info-box code {
+            background: #e0f2fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #0369a1;
+        }
+        
+        /* ===== СТРАНИЦЫ ТЕТРАДИ ===== */
+        .page {
+            background: white;
+            width: 21cm;
+            min-height: 29.7cm;
+            margin: 20px auto;
+            padding: 1cm;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            page-break-after: always;
+            position: relative;
+        }
+        
+        .page-header {
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .page-header h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .page-header .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        /* ===== ТИТУЛЬНАЯ СТРАНИЦА ===== */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+        }
+        
+        .cover-title {
+            margin-top: 2cm;
+        }
+        
+        .cover-title h1 {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .cover-subtitle {
+            font-size: 1.3rem;
+            color: #764ba2;
+            margin-bottom: 30px;
+        }
+        
+        .student-info {
+            background: #f5f3ff;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .info-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 2px dotted #ddd;
+            font-size: 1.1rem;
+        }
+        
+        .info-line:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .info-value {
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* ===== ДЕНЬ С УПРАЖНЕНИЯМИ ===== */
+        .day-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .day-title {
+            font-size: 1.3rem;
+        }
+        
+        .day-date {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .exercise {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .exercise-number {
+            background: #667eea;
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+            margin-right: 4px;
+        }
+        
+        .exercise-problem {
+            font-weight: 600;
+            color: #333;
+            margin-right: 2px;
+        }
+        
+        .exercise-answer {
+            width: 50px;
+            height: 28px;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            background: white;
+        }
+        
+        .footer-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .qr-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f0f9ff;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 2px solid #3b82f6;
+        }
+        
+        .qr-info {
+            flex: 1;
+            padding-right: 10px;
+        }
+        
+        .qr-info h4 {
+            color: #1e40af;
+            margin-bottom: 3px;
+            font-size: 0.9rem;
+        }
+        
+        .qr-info p {
+            color: #475569;
+            font-size: 0.7rem;
+            line-height: 1.2;
+        }
+        
+        .qr-code-container {
+            background: white;
+            padding: 4px;
+            border-radius: 6px;
+            border: 2px solid #3b82f6;
+            flex-shrink: 0;
+        }
+        
+        .qr-code-container canvas {
+            display: block;
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .stat-box {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-box label {
+            display: block;
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        
+        .stat-box input {
+            width: 100%;
+            padding: 5px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        
+        /* ===== ИНСТРУКЦИЯ ===== */
+        .instruction-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .instruction-step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .step-content h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .step-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* ===== ТАБЛИЦА ПРОГРЕССА ===== */
+        .progress-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .progress-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        .progress-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .progress-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        /* ===== ПЕЧАТЬ ===== */
+        @media print {
+            /* Убираем служебную информацию браузера */
+            @page {
+                margin: 0;
+                size: A4;
+            }
+            
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .control-panel,
+            .no-print {
+                display: none !important;
+            }
+            
+            .page {
+                width: 21cm;
+                height: 29.7cm;
+                margin: 0;
+                padding: 1cm;
+                box-shadow: none;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            
+            .page:last-child {
+                page-break-after: auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .control-panel {
+                padding: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page {
+                width: 100%;
+                min-height: auto;
+                padding: 1cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+    <div class="control-panel no-print">
+        <h1>📚 Генератор математической тетради</h1>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Имя ребёнка</label>
+                <input type="text" id="childName" value="Александр">
+            </div>
+            
+            <div class="form-group">
+                <label>Возраст</label>
+                <input type="number" id="childAge" value="7" min="4" max="12">
+            </div>
+            
+            <div class="form-group">
+                <label>Тетрадь</label>
+                <select id="notebookLevel">
+                    <option value="1">Тетрадь №1: Счёт до 10</option>
+                    <option value="2">Тетрадь №2: Счёт до 20</option>
+                    <option value="3">Тетрадь №3: Счёт до 100</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Уникальный ID (для QR-кодов)</label>
+                <input type="text" id="uniqueId" value="" readonly>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>URL для проверки (куда ведут QR-коды)</label>
+            <input type="text" id="checkUrl" value="https://spiffy-banoffee-d76189.netlify.app/check.html" placeholder="https://spiffy-banoffee-d76189.netlify.app/check.html">
+        </div>
+        
+        <div class="info-box">
+            <h4>ℹ️ Как это работает:</h4>
+            <p>
+                1. Заполните информацию о ребёнке<br>
+                2. Система создаст уникальный ID (например: <code>alex-1234567</code>)<br>
+                3. На каждой странице будет QR-код, ведущий на: <code>ваш-сайт.com/check/alex-1234567/day/5</code><br>
+                4. Нажмите "Сгенерировать" и распечатайте тетрадь!
+            </p>
+        </div>
+        
+        <div class="info-box" style="background: #fef3c7; border-left-color: #f59e0b;">
+            <h4>🖨️ Важно для печати в PDF:</h4>
+            <p>
+                <strong>Чтобы убрать служебную информацию браузера:</strong><br>
+                1. После генерации нажмите Ctrl+P (Windows) или Cmd+P (Mac)<br>
+                2. В настройках печати найдите <strong>"Верхние и нижние колонтитулы"</strong><br>
+                3. <strong>ВЫКЛЮЧИТЕ</strong> эту опцию (уберите галочку)<br>
+                4. Margins: выберите "None" или "Минимальные"<br>
+                5. Destination: "Сохранить как PDF"<br>
+                6. Готово! Файл будет без дат и ссылок
+            </p>
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="generateNotebook()" style="flex: 1;">
+                ✨ Сгенерировать тетрадь
+            </button>
+            <button class="btn btn-primary" onclick="window.print()">
+                🖨️ Печать
+            </button>
+        </div>
+    </div>
+    
+    <!-- КОНТЕЙНЕР ДЛЯ СТРАНИЦ -->
+    <div id="notebookPages"></div>
+    
+    <script>
+        // ==================== ПРОСТОЙ ГЕНЕРАТОР QR-КОДОВ ====================
+        // Используем canvas для создания простых сканируемых QR-кодов
+        
+        function generateQRCode(canvas, text) {
+            // Создаём QR код используя внешний сервис (надёжно работает)
+            const size = 80;
+            canvas.width = size;
+            canvas.height = size;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Используем API для генерации QR
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&color=1e40af`;
+            
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, size, size);
+            };
+            img.onerror = function() {
+                // Если API не работает - рисуем простой паттерн
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, size, size);
+                
+                ctx.fillStyle = '#1e40af';
+                // Рисуем простую сетку как placeholder
+                for(let i = 0; i < 8; i++) {
+                    for(let j = 0; j < 8; j++) {
+                        if((i + j) % 2 === 0) {
+                            ctx.fillRect(i * 10, j * 10, 10, 10);
+                        }
+                    }
+                }
+                
+                // Добавляем текст
+                ctx.fillStyle = '#1e40af';
+                ctx.font = '8px Arial';
+                ctx.fillText('QR', 30, 40);
+            };
+            img.src = qrUrl;
+        }
+        
+        // ==================== ДАННЫЕ ====================
+        
+        // Уникальные примеры для всех 30 дней
+        const exercises = {
+            1:  ["3+2","7-4","5+1","9-3","4+4","8-2","1+6","10-5","3+5","6-3","4+2","7-1","5+3","9-4","2+5","10-6","2+7","9-2","4+5","8-5","1+8","7-3","6+3","9-6","2+6","10-8","5+4","8-6","1+9","10-7"],
+            2:  ["5+2","8-3","4+3","7-2","6+2","9-5","3+4","10-6","2+6","8-4","1+7","9-3","5+3","10-4","3+6","7-5","4+4","9-6","2+5","8-7","6+1","10-7","3+7","9-8","4+2","7-4","5+5","8-8","2+8","10-9"],
+            3:  ["4+5","9-7","6+3","8-6","3+6","10-3","5+4","7-6","2+7","9-9","4+3","8-5","6+4","10-2","3+5","9-1","5+2","7-7","4+6","10-1","3+7","8-3","6+2","9-4","5+5","7-3","2+4","10-4","4+1","8-1"],
+            4:  ["1+2","6-2","7+2","9-6","3+3","5-2","8+1","10-3","2+3","7-6","4+6","8-8","5+1","9-7","3+2","6-4","1+4","10-2","2+2","7-2","4+1","9-1","6+1","8-3","5+3","7-5","1+5","10-5","3+4","6-3"],
+            5:  ["2+4","8-7","5+5","9-2","1+3","7-1","4+2","10-8","3+1","6-1","2+8","8-2","5+2","9-5","1+6","7-4","4+3","10-9","3+3","6-5","2+1","9-8","5+4","8-4","1+7","7-7","4+5","10-6","3+6","6-6"],
+            6:  ["6+2","9-3","1+1","7-3","4+4","8-1","2+9","10-1","3+4","6-2","5+3","9-6","1+8","7-2","4+1","8-7","2+3","10-4","3+5","6-4","5+1","9-4","1+2","7-6","4+6","8-5","2+5","10-7","3+7","6-1"],
+            7:  ["7+1","9-8","2+6","8-3","5+3","6-3","1+9","10-2","4+3","7-5","3+2","9-7","6+3","8-6","2+4","7-1","5+5","10-3","1+3","6-6","4+4","9-9","3+1","8-8","6+4","7-4","2+7","10-8","4+2","5-2"],
+            8:  ["1+4","6-5","8+2","9-5","3+8","7-3","2+2","10-6","5+4","8-4","4+7","9-2","1+5","7-7","3+9","6-2","2+6","10-5","5+2","8-1","4+8","9-3","1+6","7-8","3+3","6-6","2+1","10-9","5+1","8-9"],
+            9:  ["4+5","9-4","6+1","8-2","2+8","7-2","3+2","10-7","5+3","9-1","1+7","8-6","4+6","7-9","2+9","6-3","3+4","10-4","5+5","9-9","1+8","8-7","4+7","7-6","2+3","6-4","3+8","10-2","5+4","9-6"],
+            10: ["2+5","7-7","6+4","8-5","1+1","9-2","3+6","10-3","5+2","7-4","4+8","8-3","2+7","9-7","6+5","7-1","3+1","10-1","5+6","8-8","1+9","9-8","4+9","7-5","2+2","6-1","3+5","10-6","5+7","8-2"],
+            11: ["3+3","6-2","7+3","9-5","1+2","8-4","4+3","10-5","2+4","7-3","5+6","9-4","1+3","8-1","3+7","6-5","2+8","10-8","4+4","7-8","6+2","9-3","1+4","8-6","3+8","6-4","2+1","10-7","4+5","7-2"],
+            12: ["5+3","8-5","2+3","9-6","6+3","7-6","1+5","10-4","3+4","8-7","4+2","9-1","2+6","7-1","5+7","6-3","1+6","10-3","3+9","8-9","4+1","9-5","2+7","7-4","5+8","6-2","1+7","10-2","3+2","8-3"],
+            13: ["6+1","9-7","3+1","8-2","5+2","7-5","2+9","10-9","4+6","9-8","1+2","8-8","3+6","7-2","6+5","9-2","2+4","10-1","4+7","8-4","1+3","7-3","5+9","6-1","3+5","9-3","2+5","10-6","4+8","7-7"],
+            14: ["7+2","8-6","1+8","9-4","4+2","6-4","3+3","10-5","2+1","7-6","5+4","9-9","6+4","8-1","1+9","7-8","4+3","10-8","3+7","6-5","2+6","8-3","5+1","9-6","1+1","7-9","4+9","6-6","3+4","8-4"],
+            15: ["2+2","6-3","8+1","9-1","5+3","7-4","1+4","10-7","3+8","8-5","4+1","9-2","2+3","7-1","6+3","8-2","1+5","10-4","4+4","6-2","3+1","9-5","5+6","7-7","2+8","8-7","4+6","10-3","3+9","6-1"],
+            16: ["5+5","9-8","2+7","7-3","6+2","8-6","1+6","10-2","3+2","9-3","4+3","7-5","2+9","8-9","5+2","6-4","1+7","10-1","4+2","9-7","3+6","7-2","6+1","8-3","2+4","6-5","4+7","10-9","3+3","7-6"],
+            17: ["1+3","8-2","6+4","9-6","4+5","7-1","2+2","10-6","5+1","8-4","3+7","9-4","1+8","7-8","4+4","6-3","2+5","10-5","3+4","8-1","5+8","9-5","1+2","7-4","4+8","6-6","2+6","10-4","3+1","8-8"],
+            18: ["6+3","7-3","2+1","9-1","5+4","8-5","1+9","10-3","4+1","7-2","3+5","9-2","6+2","8-7","2+3","7-7","5+3","10-2","1+4","6-1","4+9","9-9","3+8","8-6","2+7","7-9","5+6","10-7","3+2","6-4"],
+            19: ["4+2","8-3","7+1","9-7","1+5","6-2","3+6","10-8","2+8","7-6","5+5","9-8","4+3","8-2","1+1","6-5","3+9","10-1","2+9","7-5","4+6","9-6","1+6","8-1","3+3","6-3","2+2","10-5","5+7","7-1"],
+            20: ["3+4","9-3","6+5","8-8","2+1","7-4","4+4","10-4","1+7","6-6","5+2","9-1","3+5","8-4","2+6","7-3","4+1","10-6","1+8","6-2","5+9","9-4","3+7","8-5","2+4","7-8","4+5","10-3","1+3","6-1"],
+            21: ["5+1","8-6","2+5","9-5","6+4","7-2","1+2","10-9","3+3","8-3","4+7","9-7","5+8","7-7","2+3","6-4","1+4","10-8","4+2","8-2","3+6","9-6","6+1","7-1","2+8","6-5","4+3","10-2","3+1","8-7"],
+            22: ["1+6","7-5","5+3","8-1","3+2","9-2","2+7","10-7","4+4","6-3","1+5","8-8","3+4","7-6","6+3","9-3","2+1","10-6","4+6","6-2","5+4","9-8","1+3","7-3","3+8","8-9","2+9","10-1","4+1","6-6"],
+            23: ["6+2","9-4","1+7","8-5","4+5","7-7","2+4","10-5","3+6","6-1","5+2","8-3","1+8","9-9","4+2","7-4","2+6","10-4","3+7","6-5","5+6","9-1","1+1","8-6","3+9","7-9","2+3","10-3","4+8","6-3"],
+            24: ["7+3","8-4","2+2","9-3","5+5","6-4","1+9","10-2","3+1","7-1","4+6","9-5","6+5","8-2","2+5","7-8","5+1","10-8","1+2","6-6","4+9","9-6","3+3","8-1","2+8","7-2","5+7","10-9","1+4","6-2"],
+            25: ["3+5","8-7","6+1","9-8","4+3","7-3","1+3","10-1","2+7","6-3","5+3","9-2","3+2","8-6","6+4","7-5","4+1","10-7","2+3","6-1","1+5","9-7","5+8","7-6","3+4","8-5","4+7","10-3","2+9","6-5"],
+            26: ["4+4","7-4","1+6","8-3","5+2","9-3","2+2","10-4","3+8","6-2","4+5","8-4","1+1","7-2","5+7","9-1","2+4","10-6","3+5","6-4","4+3","8-8","1+7","7-7","5+9","9-4","2+6","10-2","3+6","6-6"],
+            27: ["6+3","9-5","2+8","8-1","4+2","7-3","1+4","10-5","3+1","6-1","5+4","9-6","2+5","8-2","6+2","7-1","4+6","10-8","1+8","6-3","5+5","9-8","3+7","8-6","2+1","7-9","4+8","10-1","1+9","6-4"],
+            28: ["5+3","7-6","3+4","8-5","1+2","9-1","4+4","10-3","2+6","6-2","5+6","8-3","3+3","7-4","1+5","9-7","4+1","10-7","2+7","6-5","5+2","9-3","3+2","8-7","1+6","7-5","4+2","10-4","2+3","6-6"],
+            29: ["7+2","8-9","3+6","9-4","6+1","7-8","1+3","10-6","4+5","6-3","2+8","9-2","5+1","8-4","3+9","7-2","4+3","10-9","1+7","6-1","2+4","9-9","5+7","8-2","3+1","7-1","4+9","10-5","1+1","6-2"],
+            30: ["2+5","9-6","6+4","8-1","4+4","7-5","1+8","10-2","3+3","6-4","5+5","9-3","2+6","8-8","6+3","7-3","4+7","10-8","1+2","6-5","3+8","9-5","5+3","8-6","2+9","7-6","4+1","10-1","3+5","6-3"]
+        };
+        
+        const notebookInfo = {
+            1: { title: "Счёт до 10", range: "1-10", total: 900 },
+            2: { title: "Счёт до 20", range: "1-20", total: 900 },
+            3: { title: "Счёт до 100", range: "1-100", total: 900 }
+        };
+        
+        // ==================== ГЕНЕРАЦИЯ ID ====================
+        
+        function generateUniqueId() {
+            const name = document.getElementById('childName').value.toLowerCase().replace(/\s+/g, '-');
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `${name}-${timestamp}-${random}`;
+        }
+        
+        // Генерируем ID при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('uniqueId').value = generateUniqueId();
+        });
+        
+        // ==================== ГЕНЕРАЦИЯ ТЕТРАДИ ====================
+        
+        function generateNotebook() {
+            const container = document.getElementById('notebookPages');
+            container.innerHTML = '';
+            
+            const childName = document.getElementById('childName').value;
+            const childAge = document.getElementById('childAge').value;
+            const level = document.getElementById('notebookLevel').value;
+            const uniqueId = document.getElementById('uniqueId').value;
+            const checkUrl = document.getElementById('checkUrl').value;
+            const info = notebookInfo[level];
+            
+            // 1. Титульная страница
+            container.innerHTML += createCoverPage(childName, childAge, level, info);
+            
+            // 2. Инструкция
+            container.innerHTML += createInstructionPage();
+            
+            // 3. 30 дней с упражнениями
+            for (let day = 1; day <= 30; day++) {
+                container.innerHTML += createDayPage(day, childName, uniqueId, checkUrl);
+            }
+            
+            // 4. Таблица прогресса
+            container.innerHTML += createProgressPage();
+            
+            // 5. Сертификат
+            container.innerHTML += createCertificatePage(childName, info);
+            
+            // Генерируем QR-коды после создания страниц
+            setTimeout(() => {
+                generateAllQRCodes(uniqueId, checkUrl);
+                alert('✅ Тетрадь сгенерирована!\n\n💡 Совет по печати:\n1. Ctrl+P или Cmd+P\n2. Убедитесь что "Верхние и нижние колонтитулы" ВЫКЛЮЧЕНЫ\n3. Margins: None или Minimal\n4. Сохраните как PDF\n\n🔍 Проверьте что QR-коды появились (синие квадратики внизу каждого дня)');
+            }, 300);
+        }
+        
+        // ==================== СОЗДАНИЕ СТРАНИЦ ====================
+        
+        function createCoverPage(name, age, level, info) {
+            return `
+                <div class="page cover-page">
+                    <div>
+                        <div class="cover-title">
+                            <h1>📐 СТУПЕНИ</h1>
+                            <div class="cover-subtitle">Тетрадь №${level}: ${info.title}</div>
+                        </div>
+                        
+                        <div class="student-info">
+                            <div class="info-line">
+                                <span class="info-label">👤 Имя:</span>
+                                <span class="info-value">${name}</span>
+                            </div>
+                            <div class="info-line">
+                                <span class="info-label">🎂 Возраст:</span>
+                                <span class="info-value">${age} лет</span>
+                            </div>
+                            <div class="info-line">
+                                <span class="info-label">📅 Дата начала:</span>
+                                <span class="info-value">__________</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">30</div>
+                                <div class="stat-label">дней</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${info.total}</div>
+                                <div class="stat-label">примеров</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${info.range}</div>
+                                <div class="stat-label">числа</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; color: #666; padding: 20px; background: #f5f3ff; border-radius: 15px;">
+                        <p style="font-size: 1.1rem; margin-bottom: 10px;">✨ Каждый день — новый шаг к успеху! ✨</p>
+                        <p>Отслеживание прогресса • QR-коды для проверки • Умная аналитика</p>
+                        <p style="margin-top: 10px; font-weight: 600;">Создано с ❤️ для юных математиков</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createInstructionPage() {
+            return `
+                <div class="page">
+                    <div class="page-header">
+                        <h1>📖 Как пользоваться тетрадью</h1>
+                        <div class="subtitle">Следуй этим простым шагам каждый день</div>
+                    </div>
+                    
+                    <div class="instruction-grid">
+                        <div class="instruction-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Выбери день</h3>
+                                <p>Начинай с Дня 1. Решай по одному дню в день. Не спеши — важнее качество, а не скорость!</p>
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Реши 30 примеров</h3>
+                                <p>Внимательно читай знаки (+ или -). Пиши ответы в клеточки. Если не уверен — можешь считать на пальцах!</p>
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Отсканируй QR-код</h3>
+                                <p>Попроси взрослого навести камеру телефона на QR-код внизу страницы. Он автоматически откроет страницу проверки!</p>
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Введи ответы</h3>
+                                <p>Набери свои ответы на телефоне или компьютере. Нажми "Проверить" и сразу увидишь результат с красивыми звёздочками!</p>
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h3>Запиши результаты</h3>
+                                <p>Заполни время, ошибки и настроение внизу страницы. В конце месяца увидишь свой прогресс!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px;">
+                        <h4 style="color: #856404; margin-bottom: 10px;">💡 Советы для успеха:</h4>
+                        <p style="color: #856404; line-height: 1.8;">
+                            ✓ Занимайся в одно и то же время каждый день<br>
+                            ✓ Не спеши — лучше медленно, но правильно<br>
+                            ✓ Если устал — сделай перерыв<br>
+                            ✓ Хвали себя за каждый пройденный день!<br>
+                            ✓ Веди таблицу прогресса в конце тетради
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createDayPage(day, name, uniqueId, checkUrl) {
+            const dayExercises = exercises[day];
+            
+            let exercisesHTML = '';
+            dayExercises.forEach((problem, index) => {
+                exercisesHTML += `
+                    <div class="exercise">
+                        <div class="exercise-number">${index + 1}</div>
+                        <div class="exercise-problem">${problem} =</div>
+                        <div class="exercise-answer"></div>
+                    </div>
+                `;
+            });
+            
+            return `
+                <div class="page">
+                    <div class="day-header">
+                        <div class="day-title">📅 День ${day}</div>
+                        <div class="day-date">__ / __ / 2026</div>
+                    </div>
+                    
+                    <div class="exercises-grid">
+                        ${exercisesHTML}
+                    </div>
+                    
+                    <div class="footer-section">
+                        <div class="qr-section">
+                            <div class="qr-info">
+                                <h4>📱 Проверь свои ответы!</h4>
+                                <p>
+                                    1. Наведи камеру телефона на QR-код →<br>
+                                    2. Откроется страница для ввода ответов<br>
+                                    3. Сразу увидишь результат и звёздочки! ⭐
+                                </p>
+                            </div>
+                            <div class="qr-code-container">
+                                <canvas id="qr-day-${day}" class="qr-code" width="80" height="80"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-section">
+                            <div class="stat-box">
+                                <label>⏱️ Время</label>
+                                <input type="text" placeholder="__:__">
+                            </div>
+                            <div class="stat-box">
+                                <label>❌ Ошибок</label>
+                                <input type="text" placeholder="__">
+                            </div>
+                            <div class="stat-box">
+                                <label>😊 Настроение</label>
+                                <input type="text" placeholder="😊😐😔">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createProgressPage() {
+            let tableRows = '';
+            for (let i = 1; i <= 30; i++) {
+                tableRows += `
+                    <tr>
+                        <td><strong>День ${i}</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                `;
+            }
+            
+            return `
+                <div class="page">
+                    <div class="page-header">
+                        <h1>📈 Таблица прогресса</h1>
+                        <div class="subtitle">Отслеживай свои результаты</div>
+                    </div>
+                    
+                    <table class="progress-table">
+                        <thead>
+                            <tr>
+                                <th>День</th>
+                                <th>Дата</th>
+                                <th>Время</th>
+                                <th>Ошибки</th>
+                                <th>Точность</th>
+                                <th>Настроение</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: #d1fae5; border-radius: 12px;">
+                        <h3 style="color: #065f46; margin-bottom: 15px;">🎯 Мои лучшие результаты:</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                            <div>
+                                <div style="font-size: 0.9rem; color: #047857;">Лучшее время:</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #065f46; border-bottom: 2px solid #10b981; padding: 5px;">___:___</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9rem; color: #047857;">Меньше всего ошибок:</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #065f46; border-bottom: 2px solid #10b981; padding: 5px;">_____</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9rem; color: #047857;">Лучшая точность:</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #065f46; border-bottom: 2px solid #10b981; padding: 5px;">_____%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createCertificatePage(name, info) {
+            return `
+                <div class="page" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                    <h1 style="color: #f59e0b; font-size: 3rem; margin-bottom: 30px;">🏆 СЕРТИФИКАТ</h1>
+                    
+                    <div style="border: 4px solid #f59e0b; border-radius: 20px; padding: 40px; max-width: 80%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);">
+                        <p style="font-size: 1.3rem; margin-bottom: 20px; color: #92400e;">Награждается</p>
+                        <div style="font-size: 2.5rem; color: #667eea; font-weight: bold; margin: 20px 0; padding: 15px; border-bottom: 3px solid #667eea;">
+                            ${name}
+                        </div>
+                        <p style="font-size: 1.2rem; margin: 20px 0; color: #92400e;">за успешное прохождение марафона</p>
+                        <p style="font-size: 2rem; color: #7c3aed; margin: 20px 0; font-weight: bold;">"${info.title}"</p>
+                        <p style="font-size: 1.2rem; color: #92400e;">и решение ${info.total} примеров!</p>
+                        
+                        <div style="margin-top: 40px; font-size: 1.5rem;">
+                            <span style="color: #f59e0b;">⭐⭐⭐⭐⭐</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 40px; width: 150px; height: 150px; border: 4px solid #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: rotate(-15deg); background: white;">
+                        <div style="text-align: center; color: #dc2626; font-weight: bold;">
+                            <div style="font-size: 1.5rem;">МОЛОДЕЦ!</div>
+                            <div style="font-size: 1.2rem;">${info.total}/${info.total}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ==================== ГЕНЕРАЦИЯ QR-КОДОВ ====================
+        
+        function generateAllQRCodes(uniqueId, baseUrl) {
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (let day = 1; day <= 30; day++) {
+                const canvas = document.getElementById(`qr-day-${day}`);
+                if (canvas) {
+                    const url = `${baseUrl}?id=${uniqueId}&day=${day}`;
+                    try {
+                        generateQRCode(canvas, url);
+                        successCount++;
+                    } catch (error) {
+                        console.error(`Ошибка генерации QR для дня ${day}:`, error);
+                        errorCount++;
+                        // Показываем ошибку на canvas
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#fee2e2';
+                        ctx.fillRect(0, 0, 80, 80);
+                        ctx.fillStyle = '#dc2626';
+                        ctx.font = '10px Arial';
+                        ctx.fillText('Ошибка', 20, 40);
+                    }
+                } else {
+                    console.warn(`Canvas для дня ${day} не найден`);
+                }
+            }
+            
+            console.log(`✅ QR-коды сгенерированы: ${successCount} успешно, ${errorCount} ошибок`);
+            
+            if (successCount === 0) {
+                alert('⚠️ QR-коды не сгенерировались!\n\nОткройте консоль (F12) для деталей.');
+            }
+        }
+    </script>
+</body>
+</html>

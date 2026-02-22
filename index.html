@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ступени — математические тетради нового поколения с QR-кодами для проверки. 30 дней практики, умная аналитика, видимый прогресс.">
+    <title>Ступени | Математические тетради для детей с QR-проверкой</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* ===== HERO СЕКЦИЯ ===== */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="40" opacity="0.1">📚</text></svg>');
+            opacity: 0.1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        
+        .hero .highlight {
+            background: rgba(255,255,255,0.2);
+            padding: 0 10px;
+            border-radius: 5px;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        /* ===== ПРОБЛЕМА ===== */
+        .problem-section {
+            padding: 80px 20px;
+            background: #f8f9fa;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: #333;
+        }
+        
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .problem-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 4px solid #ef4444;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .problem-card h3 {
+            color: #ef4444;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .problem-card p {
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        /* ===== РЕШЕНИЕ ===== */
+        .solution-section {
+            padding: 80px 20px;
+            background: white;
+        }
+        
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+        
+        .solution-step {
+            text-align: center;
+            position: relative;
+        }
+        
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .solution-step h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .solution-step p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* ===== ПРИМЕРЫ ===== */
+        .examples-section {
+            padding: 80px 20px;
+            background: #f8f9fa;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .example-image {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .example-image img {
+            width: 100%;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .example-placeholder {
+            background: white;
+            height: 400px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e0e0e0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .example-placeholder iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            transform: scale(0.8);
+            transform-origin: top center;
+        }
+        
+        .example-caption {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        /* ===== ПРЕИМУЩЕСТВА ===== */
+        .benefits-section {
+            padding: 80px 20px;
+            background: white;
+        }
+        
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .benefit-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .benefit-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .benefit-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .benefit-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* ===== ЦЕНА ===== */
+        .pricing-section {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .pricing-card {
+            background: white;
+            color: #333;
+            max-width: 500px;
+            margin: 50px auto 0;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .price {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        
+        .price-note {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+        
+        .features-list {
+            text-align: left;
+            margin: 30px 0;
+        }
+        
+        .features-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .features-list i {
+            color: #10b981;
+            font-size: 1.2rem;
+        }
+        
+        /* ===== FAQ ===== */
+        .faq-section {
+            padding: 80px 20px;
+            background: #f8f9fa;
+        }
+        
+        .faq-container {
+            max-width: 800px;
+            margin: 50px auto 0;
+        }
+        
+        .faq-item {
+            background: white;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .faq-question {
+            padding: 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #333;
+            transition: background 0.3s;
+        }
+        
+        .faq-question:hover {
+            background: #f8f9fa;
+        }
+        
+        .faq-answer {
+            padding: 0 25px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        .faq-item.active .faq-answer {
+            padding: 25px;
+            max-height: 500px;
+        }
+        
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+        
+        /* ===== CTA ФИНАЛ ===== */
+        .final-cta {
+            padding: 80px 20px;
+            background: white;
+            text-align: center;
+        }
+        
+        .final-cta h2 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .final-cta p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #1e293b;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .footer p {
+            opacity: 0.8;
+        }
+        
+        /* ===== АДАПТИВНОСТЬ ===== */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <h1>📐 Ступени — тетради, <span class="highlight">которые работают</span></h1>
+            <p class="subtitle">30 дней практики + умная проверка с QR-кодами = видимый прогресс вашего ребёнка</p>
+            
+            <div class="cta-buttons">
+                <a href="#pricing" class="btn btn-primary">
+                    <i class="fas fa-shopping-cart"></i>
+                    Купить за 299₽
+                </a>
+                <a href="#examples" class="btn btn-secondary">
+                    <i class="fas fa-eye"></i>
+                    Посмотреть примеры
+                </a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">30</span>
+                    <span class="stat-label">дней занятий</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">900</span>
+                    <span class="stat-label">примеров</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">5–8</span>
+                    <span class="stat-label">лет возраст</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ПРОБЛЕМА -->
+    <section class="problem-section">
+        <div class="container">
+            <h2 class="section-title">Знакомо?</h2>
+            <div class="problems-grid">
+                <div class="problem-card">
+                    <h3>❌ Ребёнок плохо считает в уме</h3>
+                    <p>Считает на пальцах даже простые примеры. В школе будет сложно успевать.</p>
+                </div>
+                <div class="problem-card">
+                    <h3>❌ Скучные упражнения</h3>
+                    <p>Обычные тетради выглядят уныло. Ребёнок не хочет заниматься, капризничает.</p>
+                </div>
+                <div class="problem-card">
+                    <h3>❌ Не видно прогресса</h3>
+                    <p>Занимаетесь неделями, а результата не видно. Непонятно, что улучшилось.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- РЕШЕНИЕ -->
+    <section class="solution-section">
+        <div class="container">
+            <h2 class="section-title">Как работает наша тетрадь</h2>
+            <div class="solution-grid">
+                <div class="solution-step">
+                    <div class="step-icon">1</div>
+                    <h3>Распечатайте</h3>
+                    <p>Получите PDF на email. Распечатайте дома или в типографии.</p>
+                </div>
+                <div class="solution-step">
+                    <div class="step-icon">2</div>
+                    <h3>Решайте</h3>
+                    <p>30 примеров в день, 5-10 минут. Ребёнок видит прогресс каждый день.</p>
+                </div>
+                <div class="solution-step">
+                    <div class="step-icon">3</div>
+                    <h3>Проверяйте</h3>
+                    <p>Наведите телефон на QR-код — мгновенная проверка с красивыми звёздочками!</p>
+                </div>
+                <div class="solution-step">
+                    <div class="step-icon">4</div>
+                    <h3>Растите</h3>
+                    <p>Смотрите график прогресса, получайте умные рекомендации.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ПРИМЕРЫ -->
+    <section class="examples-section" id="examples">
+        <div class="container">
+            <h2 class="section-title">Что внутри тетради</h2>
+            <div class="examples-grid">
+                <div class="example-image">
+                    <div class="example-placeholder" style="height:420px; padding: 15px; display:flex; flex-direction:column; gap:8px; background:#fff; border-radius:10px; border:2px solid #e0e0e0; overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:8px 12px;border-radius:6px;display:flex;justify-content:space-between;font-size:0.85rem;font-weight:600;">
+                            <span>📅 День 1</span><span>__ / __ / 2026</span>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;flex:1;">
+                            ${["3+2","7-4","5+1","9-3","4+4","8-2","1+6","10-5","3+5","6-3","4+2","7-1","5+3","9-4","2+5","10-6"].map((ex,i)=>`
+                            <div style="display:flex;align-items:center;gap:4px;padding:4px 6px;background:#f8f9fa;border-radius:4px;font-size:0.8rem;">
+                                <div style="background:#667eea;color:white;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;flex-shrink:0;">${i+1}</div>
+                                <span style="font-weight:600;color:#333;">${ex} =</span>
+                                <div style="width:35px;height:20px;border:1.5px solid #667eea;border-radius:3px;background:white;"></div>
+                            </div>`).join('')}
+                        </div>
+                        <div style="background:#f0f9ff;border:1.5px solid #3b82f6;border-radius:6px;padding:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                            <div style="font-size:0.72rem;color:#1e40af;line-height:1.4;"><strong>📱 Проверь ответы!</strong><br>Наведи камеру на QR-код →</div>
+                            <div style="width:52px;height:52px;background:#1e40af;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:0.6rem;text-align:center;flex-shrink:0;">QR<br>КОД</div>
+                        </div>
+                    </div>
+                    <p class="example-caption"><strong>Страница тетради</strong><br>30 примеров в день с QR-проверкой</p>
+                </div>
+                <div class="example-image">
+                    <div class="example-placeholder" style="height:420px; padding:20px; background:#f8f9ff; border-radius:10px; border:2px solid #e0e0e0; display:flex; flex-direction:column; gap:12px;">
+                        <div style="text-align:center;">
+                            <div style="color:#667eea;font-size:1.1rem;font-weight:700;">📊 Прогресс Александра</div>
+                            <div style="color:#888;font-size:0.78rem;">Тетрадь №1: Счёт до 10</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                            ${[["12/30","Дней"],["87%","Точность"],["3:24","Время"]].map(([v,l])=>`
+                            <div style="background:white;border-radius:8px;padding:10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                                <div style="font-size:1.2rem;font-weight:800;color:#667eea;">${v}</div>
+                                <div style="font-size:0.68rem;color:#888;">${l}</div>
+                            </div>`).join('')}
+                        </div>
+                        <div style="background:white;border-radius:8px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex:1;">
+                            <div style="color:#667eea;font-size:0.8rem;font-weight:700;margin-bottom:8px;">📈 Прогресс по дням</div>
+                            <svg viewBox="0 0 260 80" style="width:100%;height:70px;">
+                                <polyline points="10,60 32,55 54,44 76,48 98,35 120,28 142,24 164,30 186,20 208,16 230,18 252,10"
+                                    fill="rgba(102,126,234,0.1)" stroke="#667eea" stroke-width="2.5" stroke-linejoin="round" fill-opacity="0.2"/>
+                                ${[60,55,44,48,35,28,24,30,20,16,18,10].map((y,i)=>`<circle cx="${10+i*22}" cy="${y}" r="3" fill="#667eea"/>`).join('')}
+                            </svg>
+                        </div>
+                        <div style="background:#d1fae5;border-left:3px solid #10b981;border-radius:6px;padding:8px;font-size:0.75rem;color:#065f46;">
+                            📈 <strong>Заметное улучшение!</strong> Точность растёт каждый день!
+                        </div>
+                    </div>
+                    <p class="example-caption"><strong>График прогресса</strong><br>Аналитика и персональные рекомендации</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ПРЕИМУЩЕСТВА -->
+    <section class="benefits-section">
+        <div class="container">
+            <h2 class="section-title">Почему родители выбирают нас</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">✨</div>
+                    <h3>Современный подход</h3>
+                    <p>QR-коды, аналитика, геймификация — детям интересно заниматься!</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">📈</div>
+                    <h3>Видимый прогресс</h3>
+                    <p>График улучшений, статистика точности, персональные инсайты.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">⏱️</div>
+                    <h3>Всего 5-10 минут в день</h3>
+                    <p>Не перегружаем ребёнка. Короткие сессии эффективнее длинных.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎯</div>
+                    <h3>Системный подход</h3>
+                    <p>30 дней структурированных занятий. Методика проверена.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <h3>Доступная цена</h3>
+                    <p>Всего 299₽ за месяц занятий. Дешевле одного урока с репетитором.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🏠</div>
+                    <h3>Занимайтесь дома</h3>
+                    <p>Не нужно никуда ехать. Всё что нужно — принтер и телефон.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ЦЕНА -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">Начните прямо сейчас</h2>
+            <div class="pricing-card">
+                <h3>Математическая тетрадь №1</h3>
+                <div class="price">299₽</div>
+                <p class="price-note">Разовый платёж, никаких подписок</p>
+                
+                <ul class="features-list">
+                    <li><i class="fas fa-check-circle"></i> PDF-тетрадь на 30 дней</li>
+                    <li><i class="fas fa-check-circle"></i> 900 примеров (счёт до 10)</li>
+                    <li><i class="fas fa-check-circle"></i> QR-коды для мгновенной проверки</li>
+                    <li><i class="fas fa-check-circle"></i> Умная аналитика и график прогресса</li>
+                    <li><i class="fas fa-check-circle"></i> Персонализированная обложка</li>
+                    <li><i class="fas fa-check-circle"></i> Таблица прогресса</li>
+                    <li><i class="fas fa-check-circle"></i> Сертификат по окончанию</li>
+                </ul>
+                
+                <a href="https://t.me/Irina_sakh65" target="_blank" class="btn btn-primary" style="width: 100%; margin-top: 20px; justify-content: center; text-decoration: none;">
+                    <i class="fab fa-telegram"></i>
+                    Написать в Telegram
+                </a>
+                
+                <p style="margin-top: 20px; font-size: 0.9rem; color: #666;">
+                    ⚡ Получите PDF на email сразу после оплаты
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- СКОРО: СЕМЕЙНЫЙ ФОРМАТ -->
+    <section style="padding: 60px 20px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); text-align: center;">
+        <div class="container">
+            <div style="font-size: 3rem; margin-bottom: 15px;">👨‍👩‍👧‍👦</div>
+            <h2 style="font-size: 2rem; color: #92400e; margin-bottom: 15px;">Скоро: Семейный марафон счёта</h2>
+            <p style="font-size: 1.1rem; color: #78350f; max-width: 600px; margin: 0 auto 25px; line-height: 1.7;">
+                Отдельный уровень для родителей. Считайте вместе с ребёнком, смотрите общий график прогресса, соревнуйтесь кто быстрее растёт. В группе занимаются — не бросают.
+            </p>
+            <a href="https://t.me/Irina_sakh65" target="_blank" style="display: inline-block; background: #92400e; color: white; padding: 14px 35px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 1rem;">
+                🔔 Хочу узнать первым
+            </a>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Частые вопросы</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Как получить тетрадь после оплаты?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Сразу после оплаты на ваш email придёт PDF-файл для печати. Распечатайте его дома или в ближайшей типографии.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Нужен ли интернет для занятий?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Нет! Ребёнок решает примеры в обычной бумажной тетради. Интернет нужен только для проверки ответов через QR-код (1-2 минуты).
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Подходит ли для моего ребёнка?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Тетрадь №1 подходит для детей 5-8 лет, которые учатся считать в пределах 10. Если ребёнок уже хорошо считает до 10, рекомендуем Тетрадь №2 (счёт до 20).
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Как работает проверка по QR-коду?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        На каждой странице есть QR-код. Наведите камеру телефона → откроется страница → введите ответы ребёнка → нажмите "Проверить". Сразу увидите результат, ошибки и рекомендации!
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Можно ли вернуть деньги?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Да! Если в течение 7 дней тетрадь вам не подойдёт — вернём деньги без вопросов. Просто напишите нам.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Есть ли другие уровни тетрадей?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Да! У нас есть 5 уровней: Счёт до 10, до 20, до 100, Умножение, Деление. После прохождения первой тетради можем предложить следующую!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ФИНАЛЬНЫЙ CTA -->
+    <section class="final-cta">
+        <div class="container">
+            <h2>Помогите ребёнку полюбить математику!</h2>
+            <p>Первые семьи уже занимаются — присоединяйтесь по специальной цене</p>
+            <a href="https://t.me/Irina_sakh65" target="_blank" class="btn btn-primary" style="font-size: 1.3rem; padding: 20px 50px;">
+                <i class="fab fa-telegram"></i>
+                Написать в Telegram
+            </a>
+        </div>
+    </section>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 Ступени — математические тетради нового поколения</p>
+            <p style="margin-top: 10px;">Telegram: <a href="https://t.me/Irina_sakh65" target="_blank" style="color: #a5b4fc;">@Irina_sakh65</a></p>
+        </div>
+    </footer>
+    
+    <script>
+        function toggleFAQ(element) {
+            const faqItem = element.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
